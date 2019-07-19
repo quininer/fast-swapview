@@ -1,0 +1,43 @@
+[package]
+name = "fast-swapview"
+version = "0.1.0"
+authors = ["quininer <quininer@live.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rayon = "1"
+# ufmt = { version = "0.1.0-beta.5", features = ["std"] }
+lexical-core = "0.4"
+fast-floats = "0.1"
+itoa = "0.4"
+ryu = "1"
+nom = "5"
+fast-lines = { git = "https://github.com/quininer/fast-lines", features = ["nightly"] }
+bstr = "0.2"
+smallvec = "0.6"
+
+[features]
+rss = []
+
+[dev-dependencies]
+crossbeam-skiplist = { git = "https://github.com/crossbeam-rs/crossbeam" }
+rand = { version = "0.7", features = ["small_rng"] }
+criterion = "0.2"
+
+[[bench]]
+name = "filesize"
+harness = false
+
+[[bench]]
+name = "parse_swap"
+harness = false
+
+[[bench]]
+name = "chop"
+harness = false
+
+[[bench]]
+name = "par_merge"
+harness = false
