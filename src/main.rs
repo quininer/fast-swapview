@@ -9,7 +9,7 @@ use fast_floats::Fast;
 use fast_lines::ReadLine;
 
 
-pub fn filesize(size: isize) -> SmallVec<[u8; 8]> {
+fn filesize(size: isize) -> SmallVec<[u8; 8]> {
     const UNITS: [u8; 4] = [b'K', b'M', b'G', b'T'];
 
     fn take1(n: Fast<f64>) -> f64 {
@@ -39,27 +39,27 @@ pub fn filesize(size: isize) -> SmallVec<[u8; 8]> {
     output
 }
 
-pub fn chop_null(mut s: Vec<u8>) -> Vec<u8> {
-    if let Some(0x00) = s.as_bytes().last_byte() {
-        s.pop_byte();
-    }
-
-    for b in s.as_bytes_mut() {
-        if *b == 0x0 {
-            *b = b' ';
+fn get_comm_for(pid: &Path) -> io::Result<Vec<u8>> {
+    fn chop_null(mut s: Vec<u8>) -> Vec<u8> {
+        if let Some(0x00) = s.as_bytes().last_byte() {
+            s.pop_byte();
         }
+
+        for b in s.as_bytes_mut() {
+            if *b == 0x0 {
+                *b = b' ';
+            }
+        }
+
+        s
     }
 
-    s
-}
-
-pub fn get_comm_for(pid: &Path) -> io::Result<Vec<u8>> {
     let cmdline_path = pid.join("cmdline");
     let buf = fs::read(cmdline_path)?;
     Ok(chop_null(buf))
 }
 
-pub fn get_swap_for<R: Read>(reader: R) -> io::Result<isize> {
+fn get_swap_for<R: Read>(reader: R) -> io::Result<isize> {
     fn parse(input: &[u8]) -> Option<isize> {
         use nom::bytes::complete::{ tag, take_until };
         use nom::character::complete::multispace1;
@@ -98,7 +98,7 @@ pub fn get_swap_for<R: Read>(reader: R) -> io::Result<isize> {
     Ok(s * 1024)
 }
 
-pub fn get_swap() -> io::Result<Vec<(usize, isize, Vec<u8>)>> {
+fn get_swap() -> io::Result<Vec<(usize, isize, Vec<u8>)>> {
     fn osstr_to_usize(input: &OsStr) -> Option<usize> {
         let b = <[u8]>::from_os_str(input)?;
         let result = lexical_core::try_atousize_slice(b);
@@ -158,5 +158,6 @@ fn main() -> io::Result<()> {
         )?;
     }
     writeln!(&mut stdout, "Total: {:>8}", filesize(total).as_bstr())?;
+
     Ok(())
 }
