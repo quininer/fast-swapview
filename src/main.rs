@@ -1,4 +1,5 @@
 use std::fs;
+use std::ffi::OsStr;
 use std::path::Path;
 use std::io::{ self, Read, Write };
 use smallvec::SmallVec;
@@ -98,16 +99,26 @@ pub fn get_swap_for<R: Read>(reader: R) -> io::Result<isize> {
 }
 
 pub fn get_swap() -> io::Result<Vec<(usize, isize, Vec<u8>)>> {
+    fn osstr_to_usize(input: &OsStr) -> Option<usize> {
+        let b = <[u8]>::from_os_str(input)?;
+        let result = lexical_core::try_atousize_slice(b);
+        if let lexical_core::ErrorCode::Success = result.error.code {
+            Some(result.value)
+        } else {
+            None
+        }
+    }
+
     // big
     let mut swapinfo = fs::read_dir("/proc")?
         .par_bridge()
         .filter_map(|entry| {
             let path = entry.ok()?.path();
-            let pid = path.file_name()
-                .and_then(|name| name.to_str())
-                .and_then(|name| name.parse::<usize>().ok())?;
-
+            let pid = path
+                .file_name()
+                .and_then(|name| osstr_to_usize(name))?;
             let file = fs::File::open(path.join("smaps")).ok()?;
+
             match get_swap_for(&file) {
                 Ok(0) | Err(_) => None,
                 Ok(swap) => {

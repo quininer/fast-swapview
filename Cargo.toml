@@ -14,7 +14,7 @@ fast-floats = "0.1"
 itoa = "0.4"
 ryu = "1"
 nom = "5"
-fast-lines = { git = "https://github.com/quininer/fast-lines", features = ["nightly"] }
+fast-lines = { git = "https://github.com/quininer/fast-lines" }
 bstr = "0.2"
 smallvec = "0.6"
 
@@ -25,6 +25,10 @@ rss = []
 crossbeam-skiplist = { git = "https://github.com/crossbeam-rs/crossbeam" }
 rand = { version = "0.7", features = ["small_rng"] }
 criterion = "0.2"
+
+[profile.release]
+debug = true
+lto = true
 
 [[bench]]
 name = "filesize"
